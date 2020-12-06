@@ -1,0 +1,7 @@
+
+
+gcc -std=c99 main.c ass4.c ass4.h  -lm -DSIZE=3 -o a.out
+
+
+
+//gcc ass4.c main.c -std=c99 -lm -DSIZE=3 
