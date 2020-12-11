@@ -16,6 +16,17 @@
 #define CHGLEN 12
 #define ADDLEN 9
 #define DLTLEN 10
+/*
+ * A Note about why I used a global array:
+ * I defined a the boxArr array to be global, because the other 2d array I can use is declared in the main.
+ * given that I can't change the main the code will be checked with, I needed the array to be global.
+ * if I declared the array each time anew every time I needed it, I would have to add about ~10 lines of the
+ * same code to each function I use the array in. Also, the changes I make in this array span a lot of functions,
+ * so I needed they array to be unchanging.
+ * boxArr:
+ * this 2d array is an array of "boxes" with each box representing a sub-square in the board.
+ * each "box" is the digits from top-left to the bottom right of the square.
+ * */
 char boxArr[SIZE * SIZE][SIZE * SIZE];
 int charExist(char board[][SIZE * SIZE], char toFind);
 void replaceAll(char board[][SIZE * SIZE], char toReplace, char replaceWith);
@@ -51,6 +62,7 @@ void addSpaces(char str[], int index, int num)
 
     for (int i = 0; i < num; i++)
     {
+        // we add spaces to locations after the index
         str[ index + i ] = ' ';
     }
 }
@@ -73,7 +85,7 @@ void initArr(char str[], int len)
 /*******************
  * Function Name: countConvertibles
  *	Input: char token[] - the string we search in, int len -length of token
- *	Output: int total - the total numver of convertible chars we found
+ *	Output: int total - the total number of convertible chars we found
  *	Function Operation: find and count small letters which need to be replaced by spaces
 *******************/
 int countConvertibles(char token[], int len)
@@ -82,6 +94,12 @@ int countConvertibles(char token[], int len)
     int total = 0;
     for (int i = 0; i < len; i++)
     {
+        /*
+         * we add the value of each letter in spaces to the total
+         * we know that the value depends on the size defined so we break into cases
+         * in the case of letter a its replaced by 1 space, so no additionnal space is needed,
+         * so the value of a is 0, and we add 0 to the total. etc.
+         */
         switch (SIZE)
         {
             case 1:
@@ -97,6 +115,7 @@ int countConvertibles(char token[], int len)
             case 2:
             {
                 {
+                    //we
                     if(token[ i ] == 'a')
                     {
                         total += 0;
@@ -135,23 +154,23 @@ int countConvertibles(char token[], int len)
                     {
                         total += 3;
                     }
-                    if(token[ i ] == 'e')// 5 spaces
+                    if(token[ i ] == 'e')
                     {
                         total += 4;
                     }
-                    if(token[ i ] == 'f')//6 spaces
+                    if(token[ i ] == 'f')
                     {
                         total += 5;
                     }
-                    if(token[ i ] == 'g')//7 spaces
+                    if(token[ i ] == 'g')
                     {
                         total += 6;
                     }
-                    if(token[ i ] == 'h')//8 spaces
+                    if(token[ i ] == 'h')
                     {
                         total += 7;
                     }
-                    if(token[ i ] == 'i')//9 spaces
+                    if(token[ i ] == 'i')
                     {
                         total += 8;
                     }
@@ -173,14 +192,20 @@ int countConvertibles(char token[], int len)
 void moveAllRight(char str[], int len, int index, int num)
 {
 
+/*
+ * we run the loop a number of times depending on the num we receive
+ * each time we move the string starting from the given index to the right, one index each iteraion
+ */
     for (int i = 0; i < num; i++)
     {
-        for (int j = (len - 1 + i); j > index; j--)//we move the whole string to the right
+        for (int j = (len - 1 + i); j > index; j--)
         {
+            //change the next number to the previous
             str[ j + 1 ] = str[ j ];
             str[ j ] = ' ';
         }
     }
+    //we finish the sring with the null terminator manually because we overwrite it
     str[ SIZE * SIZE ] = '\0';
 }
 
@@ -197,6 +222,12 @@ int replaceLetters(char str[], int len, int freeSlots)
     int isReplaced = 0;
     for (int i = 0; i < len; i++)
     {
+        /*
+         * We know that the value depends on the size defined so we break into cases
+         * each time we encounter a convertible letter, we move the rest of the string all the way
+         * to the right side, to free spots for the spaces.
+         * we then 
+         * */
         switch (SIZE)
         {
             case 1:
