@@ -2,6 +2,8 @@
 
 gcc -std=c99 main.c ass4.c ass4.h  -lm -DSIZE=3 -o a.out
 gcc -std=c99 testEx4_SIZE3_5.c ass4.c ass4.h  -lm -DSIZE=3 -o a.out
+gcc -std=c99 testEx4_SIZE2_7.c ass4.c ass4.h  -lm -DSIZE=2 -o a.out
+gcc -std=c99 testEx4_SIZE1_5.c ass4.c ass4.h  -lm -DSIZE=1 -o a.out
 
 
 

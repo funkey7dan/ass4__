@@ -9,16 +9,16 @@ void f4();
 void f5();
 
 int main() {
-    printf("f1:  *************************\n");
-    f1();
+//    printf("f1:  *************************\n");
+//    f1();
     printf("f2:  *************************\n");
     f2();
-    printf("f3:  *************************\n");
-    f3();
-    printf("f4:  *************************\n");
-    f4();
-    printf("f5:  *************************\n");
-    f5();
+//    printf("f3:  *************************\n");
+//    f3();
+//    printf("f4:  *************************\n");
+//    f4();
+//    printf("f5:  *************************\n");
+//    f5();
     return 0;
 }
 void f1(){
@@ -73,23 +73,24 @@ void f3(){
 
 void f2(){
     char board [SIZE*SIZE][SIZE*SIZE];
-    char str[] = "12a345679/12a345679/12a345679/12a345679/12a345678/12a345978/12a345879/12a385679/18a345679";
+    char str[] = "12a345679/121345679/12a345679/12a345679/12a345678/12a345978/12a345879/12a385679/18a345679";
+    //char str[] = "i/123456789/12a456789/123b6789/1234c89/12345d/12345678*//A23456789";
     createBoard(board,str);
-    char str1[]="replaceAll,1,@";
+   /* char str1[]="replaceAll,6";
     makeMove(board,str1);
     printBoard(board);
-    printf("**********************************\n");
-    char str2[]="change,0,1,@";
+    printf("**********************************\n");*/
+    char str2[]="change,1,2,!";
     makeMove(board,str2);
     printBoard(board);
     printf("**********************************\n");
-    char str3[]="add,0,2,@";
+    /*char str3[]="add,0,1,@";
     makeMove(board,str3);
     printBoard(board);
     printf("**********************************\n");
     char str4[]="delete,20,1";
     makeMove(board,str4);
-    printBoard(board);
+    printBoard(board);*/
 
 
 }
