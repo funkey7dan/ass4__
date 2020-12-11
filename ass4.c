@@ -12,6 +12,7 @@
 #include <string.h>
 #define MOVESIZE 16
 #define BOARDSIZE (SIZE*SIZE*SIZE*SIZE+SIZE*SIZE)
+char boxArr[SIZE*SIZE][SIZE*SIZE];
 void replaceAll(char board[][SIZE * SIZE], char toReplace, char replaceWith);
 int isStrLgl(char str[]);
 int countSigns(char str[], char sign);
@@ -26,10 +27,11 @@ void addSpaces(char str[], int index, int num);
 void myCreateBoard(char board[][SIZE * SIZE], char str[], char tokenCopy[]);
 int isSudoku(char board[][SIZE * SIZE]);
 int findDups(char box[][SIZE * SIZE]);
-int findSign(char board[][SIZE * SIZE], char toFind, int index);
+int findSign(char toFind, int index);
 int checkRowSpaces(char board[][SIZE * SIZE]);
 int checkColSpaces(char board[][SIZE * SIZE]);
-
+void squaresToArr(char box[][SIZE*SIZE],char board[][SIZE * SIZE]);
+void boxify(char board[][SIZE*SIZE]);
 /*******************
  * Function Name: addSpaces
  *	Input:num - number of spaces to add
@@ -719,8 +721,30 @@ int checkColGlob(char board[][SIZE * SIZE])
     }
     return 0;
 }
+void boxify(char board[][SIZE*SIZE])
+{
+    int k = 0, num = 0;
+    //we break the board into boxes
+    for (int si = 0; si < SIZE; si++)
+    {
+        for (int sj = 0; sj < SIZE; sj++)
+        {
+            for (int i = 0; i < SIZE; i++)
+            {
+                for (int j = 0; j < SIZE; j++)
+                {
+                    //printf("%c", board[si*3+i][sj*3+j]);//TODO DELETE
 
-int findDups(char box[][SIZE * SIZE])
+                    boxArr[ k ][ num % (SIZE * SIZE) ] = board[ si * SIZE + i ][ sj * SIZE + j ];
+                    num++;
+                }
+            }
+            k++;
+        }
+    }
+
+}
+int findDups(char boxArr[][SIZE * SIZE])//find if there is more than 1 occurence of char per square
 {
 
     int dups = 0;
@@ -730,7 +754,7 @@ int findDups(char box[][SIZE * SIZE])
         {
             for (int j = i + 1; j < SIZE * SIZE; j++)
             {
-                if((box[ k ][ i ] == box[ k ][ j ]) && (box[ k ][ i ] != ' '))
+                if((boxArr[ k ][ i ] == boxArr[ k ][ j ]) && (boxArr[ k ][ i ] != ' '))
                 {
                     dups++;
                 }
@@ -743,7 +767,7 @@ int findDups(char box[][SIZE * SIZE])
 int checkSquares(char board[][SIZE * SIZE])
 {
 
-    int k = 0, num = 0;
+    /*int k = 0, num = 0;
     char box[SIZE * SIZE][SIZE * SIZE];//we break the board into boxes
     for (int si = 0; si < SIZE; si++)
     {
@@ -761,8 +785,9 @@ int checkSquares(char board[][SIZE * SIZE])
             }
             k++;
         }
-    }
-    return findDups(box);
+    }*/
+    boxify(board);
+    return findDups(boxArr);
 }
 
 int testBoard(char board[][SIZE * SIZE])
@@ -822,11 +847,11 @@ int checkColSpaces(char board[][SIZE * SIZE])
     return 1;
 }
 
-int findSign(char board[][SIZE * SIZE], char toFind, int index)//check the index box to find the space
+int findSign(char toFind, int index)//check the index box to find the space
 {
 
-    int k = 0, num = 0, occurences = 0;//breakes the board into squares
-    char box[SIZE * SIZE][SIZE * SIZE];
+    int occurences = 0;
+    /*char box[SIZE * SIZE][SIZE * SIZE];
     for (int si = 0; si < SIZE; si++)
     {
         for (int sj = 0; sj < SIZE; sj++)
@@ -843,30 +868,59 @@ int findSign(char board[][SIZE * SIZE], char toFind, int index)//check the index
             }
             k++;
         }
-    }
+    }*/
     for (int r = 0; r < SIZE * SIZE; r++)
     {
-        if(box[ index ][ r ] == toFind)
+        if(boxArr[ index ][ r ] == toFind)
         {
             occurences++;
         }
     }
-    printf("DEBUG:Box %d has %d '%c's\n", index, occurences, toFind);
+    //printf("DEBUG:Box %d has %d '%c's\n", index, occurences, toFind);//TODO delete
     return occurences;
 }
+void squaresToArr(char box[][SIZE*SIZE],char board[][SIZE * SIZE])
+{
+    int k = 0, num = 0;
+    //char box[SIZE * SIZE][SIZE * SIZE];//we break the board into boxes
+    for (int si = 0; si < SIZE; si++)
+    {
+        for (int sj = 0; sj < SIZE; sj++)
+        {
+            for (int i = 0; i < SIZE; i++)
+            {
+                for (int j = 0; j < SIZE; j++)
+                {
+                    //printf("%c", board[si*3+i][sj*3+j]);//TODO DELETE
 
+                     board[ si * SIZE + i ][ sj * SIZE + j ]=boxArr[ k ][ num % (SIZE * SIZE) ];
+                    num++;
+                }
+            }
+            k++;
+        }
+    }
+
+}
 void completeBoard(char board[][SIZE * SIZE])
 {
     //int a=findSign(board,' ',1);
     if((testBoard(board) == 1) && (checkRowSpaces(board) == 1) && (checkColSpaces(board) == 1))
     {
-        /*for (int i = 0; i < SIZE * SIZE; i++)//check each box for empty spaces
+        for (int i = 0; i < SIZE * SIZE; i++)//check each box for empty spaces i=box index
         {
-            if(findSign(board,' ',i)==1)//if there is an empty space
+            for (int j = 0; j < SIZE * SIZE; j++)//j= chars in box
+            if(boxArr[i][j]==' ')
             {
-
+                for(int k=1;k<=SIZE*SIZE;k++)
+                {
+                    boxArr[i][j]=k+'0';
+                    if(findSign(boxArr[i][j],i)==1)//if the number doesn't break the box rules
+                        break;
+                }
             }
-        }*/
+        }
+        squaresToArr(boxArr,board);
     }
     else
     {

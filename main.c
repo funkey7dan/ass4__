@@ -9,14 +9,14 @@ void f4();
 void f5();
 
 int main() {
-//    printf("f1:  *************************\n");
-//    f1();
-//    printf("f2:  *************************\n");
-//    f2();
-//    printf("f3:  *************************\n");
-//    f3();
-//    printf("f4:  *************************\n");
-//    f4();
+    printf("f1:  *************************\n");
+    f1();
+    printf("f2:  *************************\n");
+    f2();
+    printf("f3:  *************************\n");
+    f3();
+    printf("f4:  *************************\n");
+    f4();
     printf("f5:  *************************\n");
     f5();
     return 0;
@@ -43,10 +43,10 @@ void f4(){
     char board2 [SIZE*SIZE][SIZE*SIZE];
     char str1[] = "12a345679/12a345679/12a345679/12a345679/12a345678/12a345978/12a345879/12a385679/18a345678";
     createBoard(board,str);
-//    printBoard(board);
-//    printf("*************************\n");
+    printBoard(board);
+   printf("*************************\n");
     createBoard(board2,str1);
-//    printBoard(board2);
+    printBoard(board2);
     printf("%d\n",isSameBoard(board,board2));
 }
 void f5(){
