@@ -27,7 +27,7 @@ void f1(){
 
 
     //char str[] = "/123456789/12a456789/123b6789/1234c89/12345d/12345678*//A23456789";
-    char str[] = "12a345679/12a345679/12a345679/12a345679/12a345678/12a345978/12a345879/12a385679/18a345679";
+    char str[] = "i/123456789/12a456789/123b6789/1234c89/12345d/12345678*//A23456789";
     createBoard(board,str);
     printBoard(board);
 //    printf("*************************\n");
@@ -40,7 +40,7 @@ void f4(){
     char str1[] = "12a345679/12a345679/12a345679/12a345679/12a345678/12a345978/12a345879/12a385679/18a345678";
     createBoard(board,str);
     printBoard(board);
-   printf("*************************\n");
+    printf("*************************\n");
     createBoard(board2,str1);
     printBoard(board2);
     printf("%d\n",isSameBoard(board,board2));
@@ -72,10 +72,10 @@ void f2(){
     char str[] = "12a345679/121345679/12a345679/12a345679/12a345678/12a345978/12a345879/12a385679/18a345679";
     //char str[] = "i/123456789/12a456789/123b6789/1234c89/12345d/12345678*//A23456789";
     createBoard(board,str);
-   /* char str1[]="replaceAll,6";
-    makeMove(board,str1);
-    printBoard(board);
-    printf("**********************************\n");*/
+    /* char str1[]="replaceAll,6";
+     makeMove(board,str1);
+     printBoard(board);
+     printf("**********************************\n");*/
     char str2[]="change,1,2,!";
     makeMove(board,str2);
     printBoard(board);

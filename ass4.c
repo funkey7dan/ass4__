@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#define MOVESIZE 16
+#define MOVESIZE 17
 #define BOARDSIZE (SIZE*SIZE*SIZE*SIZE+SIZE*SIZE)
 #define RPLCLEN 14
 #define CHGLEN 12
@@ -205,8 +205,8 @@ void moveAllRight(char str[], int len, int index, int num)
             str[ j ] = ' ';
         }
     }
-    //we finish the sring with the null terminator manually because we overwrite it
-    str[ SIZE * SIZE ] = '\0';
+    //we finish the string with the null terminator manually because we overwrite it
+    //str[ SIZE * SIZE ] = '\0';
 }
 
 /*******************
@@ -262,6 +262,14 @@ int replaceLetters(char str[], int len, int freeSlots)
                     isReplaced++;
                 }
                 break;
+                /*
+                 * We know that the value depends on the size defined so we break into cases
+                 * each time we encounter a convertible letter, we move the rest of the string all the way
+                 * to the right side, to free spots for the spaces.
+                 * we then add spaces instead of the letter.
+                 * finally, we increment the counter, to indicate we replaced words
+                 *
+                 */
             case 3:
                 if(str[ i ] == 'a')
                 {
@@ -319,6 +327,7 @@ int replaceLetters(char str[], int len, int freeSlots)
                 break;
         }
     }
+    //if we replaced a letter we return 1
     if(isReplaced != 0)
     {
         return 1;
@@ -339,8 +348,10 @@ int countSigns(char str[], char sign)
 {
 
     int counter = 0;
+    //we run the loop for the length of the string
     for (int i = 0; i <= strlen(str); i++)
     {
+        //each time we find the sign we increment the counter
         if(str[ i ] == sign)
         {
             counter++;
@@ -358,21 +369,26 @@ int countSigns(char str[], char sign)
 *******************/
 void checkLoneSlashes(char str[])
 {
-
-    if(str[ 0 ] == '/')//if the slash comes first, the first line is empty and we need to pad it for strtok
+    //if the slash comes first, the first line is empty and we need to pad it for strtok
+    if(str[ 0 ] == '/')
     {
-        for (int j = strlen(str) + 1; j > 0; j--)//we move the whole string to the right
+        //we start the loop from the end of the array, we begin from the length of str+1 for \0 which strlen ignores
+        for (int j = strlen(str) + 1; j > 0; j--)
         {
+            //we change the space to the letter before it
             str[ j + 1 ] = str[ j ];
         }
+        //because this slash was first we manually replace it
         str[ 0 ] = ' ';
         str[ 1 ] = '/';
     }
     for (int i = 1; i < strlen(str); i++)
     {
+        //we check if the the slashes are adjacent
         if((str[ i ] == '/') && (str[ i + 1 ] == '/'))
         {
-            for (int k = strlen(str) + 1; k > 0; k--)//we move the whole string to the right
+//we start the loop from the end of the array, we begin from the length of str+1 for \0 which strlen ignores
+            for (int k = strlen(str) + 1; k > 0; k--)
             {
                 str[ k + 1 ] = str[ k ];
                 if(k == i)
@@ -382,6 +398,7 @@ void checkLoneSlashes(char str[])
                 }
             }
         }
+        //if we reached the end of the string we need to replace the null terminator to indicate the new end of string
         if((str[ i ] == '/') && (str[ i + 1 ] == '\0'))
         {
             str[ i + 1 ] = ' ';
@@ -402,9 +419,13 @@ int isStrLgl(char str[])
 
     int tempLength = strlen(str);
     tempLength += countConvertibles(str, tempLength);
-    //we test whether the length of the string is greater than the size of the board for our given SIZE
-    if((tempLength < BOARDSIZE) && ((countSigns(str, '/') == SIZE * SIZE - 1)))//we check the amount of slashes
+
+    /*we test whether the length of the string is greater than the size of the board for our given SIZE
+     *we also check the amount of slashes.
+     */
+    if((tempLength < BOARDSIZE) && ((countSigns(str, '/') == SIZE * SIZE - 1)))
     {
+        //if everything is in order we return 1
         return 1;
     }
     else
@@ -422,52 +443,53 @@ int isStrLgl(char str[])
 *******************/
 void myCreateBoard(char board[][SIZE * SIZE], char str[], char tokenCopy[])
 {
-
+    //indication that the string is legal
     int tester = isStrLgl(str);
+    // we check if there is enough slashes and the length is not greater than allowed.
     if(tester == 1)
     {
-        //char tokenCopy[(SIZE*SIZE)];
-        //initArr(tokenCopy,SIZE*SIZE);
-        char strCopy[BOARDSIZE]; //TODO check for SIZE cases
-        strcpy(strCopy, str);
+        // we create a copy of the string, because strtok is destructive to the string we run it on
+        char strCopy[BOARDSIZE];
+        strncpy(strCopy, str, BOARDSIZE);
+        // we check if there are empty slashes, and pad them with spaces because strtok cant tokenize them otherwise.
         checkLoneSlashes(strCopy);
-        int i = 0, len = 0, index = 0, replacedLetters = 0;//i=board rows j=board columns
+        // i - start of our line in the board, len - legnth of the token, index - the index of the line we are at
+        int i = 0, len = 0, index = 0, replacedLetters = 0;
+        // we save the result of strtok in the pointer token
         char *token = strtok(strCopy, "/");
-        len = strlen(token);
-        //len+=countConvertibles(token,len);
-        if((len + countConvertibles(token, len))
-           > (SIZE * SIZE))//TODO check if not code duplication
-        {
-            printf("Error\n");
-            return;
-        }
         while ((token != NULL))
         {
+            //we save the length of the token to compare it with things later
             len = strlen(token);
-            //len+=countConvertibles(token,len);
-            if((len + countConvertibles(token, len))
-               > (SIZE * SIZE))
+            //we check if after we convert the letters to spaces we will still be in the allowed size range
+            if((len + countConvertibles(token, len)) > (SIZE * SIZE))
             {
                 printf("Error\n");
                 return;
             }
+            //we initialize the tokenCopy with spaces to flush the previous chars from it
             initArr(tokenCopy, (SIZE * SIZE));
-            if(tokenCopy != NULL)
+            //if token is NULL there is no need to copy it
+            if(token != NULL)
             {
-                strncpy(tokenCopy, token, strlen(token));
+                //we copy the token to our tokenCopy on which we will operate
+                strncpy(tokenCopy, token, SIZE * SIZE);
             }
-            if(
-                    replaceLetters(tokenCopy, (SIZE * SIZE), (SIZE * SIZE) - len)
-                    )
+            //if we replaced letters with spaces in the token, we will pass the tokenCopy to the board array
+            if(replaceLetters(tokenCopy, strlen(tokenCopy), (SIZE * SIZE) - len))
             {
                 strncpy(*board + i, tokenCopy, SIZE * SIZE);
                 token = strtok(NULL, "/");
+                //we update our index to know on which line we are currently
                 index++;
+                //we move between lines, each line is equal to SIZE^2 in length
                 i += (SIZE * SIZE);
             }
+                //if there were no spaces to add we pass the token as is
             else
             {
-                if(len < (SIZE * SIZE))//if we are working with token
+                //if our token is too short we pad the line with spaces in the board itself
+                if(len < (SIZE * SIZE))
                 {
                     for (int k = len; k < (SIZE * SIZE); k++)
                     {
@@ -476,7 +498,7 @@ void myCreateBoard(char board[][SIZE * SIZE], char str[], char tokenCopy[])
                 }
                 strncpy(*board + i, token, len);
                 token = strtok(NULL, "/");
-                index++;//TODO CHANGE MY NAME and
+                index++;
                 i += (SIZE * SIZE);
             }
         }
@@ -496,9 +518,10 @@ void myCreateBoard(char board[][SIZE * SIZE], char str[], char tokenCopy[])
 *******************/
 void createBoard(char board[][SIZE * SIZE], char str[])
 {
-
+    //depending on the SIZE we create a different tokenCopy with the right amount of spaces from the get-go.
     switch (SIZE)
     {
+        // we invoke the function that creates the board for us
         case 1:
         {
             char tokenCopy[] = "  ";
@@ -509,14 +532,14 @@ void createBoard(char board[][SIZE * SIZE], char str[])
         {
             char tokenCopy[] = "     ";
             myCreateBoard(board, str, tokenCopy);
-        }
             break;
+        }
         case 3:
         {
             char tokenCopy[] = "          ";
             myCreateBoard(board, str, tokenCopy);
-        }
             break;
+        }
     }
 }
 
@@ -527,30 +550,32 @@ void createBoard(char board[][SIZE * SIZE], char str[])
  *	Function Operation: prints the board
 *******************/
 void printBoard(char board[][SIZE * SIZE])
-{//"12a345679/12a345679/12a345679/12a345679/12a345678/12a345978/12a345879/12a385679/18a345679"
+{
+    // we go through the rows of the board
     for (int i = 0; i < (SIZE * SIZE); i++)
     {
+        // and we go through the columns of the board
         for (int j = 0; j < (SIZE * SIZE); j++)
         {
+            //we reached th end of the line and we need to go down a line
             if(j == ((SIZE * SIZE) - 1))
             {
                 printf("%c\n", board[ i ][ j ]);
             }
-            else if((j == SIZE - 1) || (j == 2 * SIZE - 1))//if we reach the separation line
+                //if we reach the separation line we print the ABS sign to separate the board
+            else if((j == SIZE - 1) || (j == 2 * SIZE - 1))
             {
                 printf("%c | ", board[ i ][ j ]);
             }
+                //no special cases, just print the char at that location
             else
             {
                 printf("%c", board[ i ][ j ]);
             }
         }
-        if((i == SIZE - 1) || (i == 2 * SIZE - 1))//print spacers
+        // we print the spacers
+        if((i == SIZE - 1) || (i == 2 * SIZE - 1))
         {
-            /*for (int k = 0; k < (SIZE * SIZE); k++)
-            {
-                printf(" ");
-            }*/
             printf("\n");
         }
     }
@@ -564,9 +589,10 @@ void printBoard(char board[][SIZE * SIZE])
  *	Function Operation: check if the move is legal - if the coordinates we were given are withing the bounds,
  *	and that are not forbidden symbols
 *******************/
-int isLglMove(char input) //we check if the input in the string is
-{
 
+int isLglMove(char input)
+{
+    //we check if the input in the string is an char that's allowed - numbers 0-9
     if((input >= '0') && (input <= '9'))
     {
         return 1;
@@ -586,10 +612,12 @@ int isLglMove(char input) //we check if the input in the string is
 int charExist(char board[][SIZE * SIZE], char toFind)//check if a char exists in the array
 {
 
+    //we loop through the board in search of the char
     for (int i = 0; i < (SIZE * SIZE); i++)
     {
         for (int j = 0; j < (SIZE * SIZE); j++)
         {
+            // if we found our char we return 1
             if(board[ i ][ j ] == toFind)
             {
                 return 1;
@@ -609,8 +637,14 @@ int charExist(char board[][SIZE * SIZE], char toFind)//check if a char exists in
 void deleteChar(char board[][SIZE * SIZE], char locationRow, char locationCol)
 {
 
+    //we check if the given coordinates are comprise of allowed characters
     if(isLglMove(locationCol) && isLglMove(locationRow))
     {
+        /*
+         * we receive the coordinates as chars so we subtract the ascii sign of 0 from the digit to get the number itself
+         * if the location we are given is already an empty space we return an error.
+         *
+         * */
         if((board[ locationRow - '0' ][ locationCol - '0' ]) == ' ')
         {
             printf("Error\n");
@@ -638,13 +672,20 @@ void deleteChar(char board[][SIZE * SIZE], char locationRow, char locationCol)
 void addChar(char board[][SIZE * SIZE], char locationRow, char locationCol, char toAdd)
 {
 
+    //we check if the given coordinates are comprise of allowed characters
     if(isLglMove(locationCol) && isLglMove(locationRow))
     {
+        /*
+     * we receive the coordinates as chars so we subtract the ascii sign of 0 from the digit to get the number itself
+     * if the location we are given isn't an empty space we return an error.
+     *
+     * */
         if((board[ locationRow - '0' ][ locationCol - '0' ]) != ' ')
         {
             printf("Error\n");
             return;
         }
+            //if the space is empty we put the char
         else
         {
             board[ locationRow - '0' ][ locationCol - '0' ] = toAdd;
@@ -696,12 +737,14 @@ void changeChar(char board[][SIZE * SIZE], char locationRow, char locationCol, c
 void replaceAll(char board[][SIZE * SIZE], char toReplace, char replaceWith)
 {
 
+    // we check if the spot we need to change isn't empty, and if the char even exists in the board
     if((toReplace != ' ') && (charExist(board, toReplace)))
     {
         for (int i = 0; i < (SIZE * SIZE); i++)
         {
             for (int j = 0; j < (SIZE * SIZE); j++)
             {
+                //if we find the char we need to replace, we replace it
                 if(board[ i ][ j ] == toReplace)
                 {
                     board[ i ][ j ] = replaceWith;
@@ -725,14 +768,31 @@ void replaceAll(char board[][SIZE * SIZE], char toReplace, char replaceWith)
 void makeMove(char board[][SIZE * SIZE], char move[])
 {
 
-    char strCopy[MOVESIZE], myMove[MOVESIZE], toReplace, replaceWith, locationRow, locationCol, toAdd;
+/*
+ * strngCopy - we copy the given move to protect it from strtok
+ * myMove - is the array we keep the name of the move for comparsion
+ * */
+    char strngCopy[MOVESIZE], myMove[MOVESIZE], toReplace, replaceWith, locationRow, locationCol, toAdd;
     char *token = NULL;
-    strcpy(strCopy, move);//we copy the given move the our array
-    token = strtok(strCopy, ",");
+    // we know the maximum length of the move we are allowed, so if the given string is longer we return with error
+    if(strlen(move) > MOVESIZE)
+    {
+        printf("Error\n");
+        return;
+    }
+    //we copy the given move the our array
+    strcpy(strngCopy, move);
+    //we tokenize the copy using , as our delimiter
+    token = strtok(strngCopy, ",");
     strcpy(myMove, token);
+    // we check to see the move we are given,and we check if the move isn't longer than the known length
     if((strcmp(myMove, "replaceAll") == 0) && (strlen(move) == RPLCLEN))
     {
+        /*
+         * we proceed to break the given move into chunks, to pass it to our function
+         * */
         token = strtok(NULL, ",");
+        // if there was nothing after the ',' we return error
         if(token == NULL)
         {
             printf("Error\n");
@@ -748,6 +808,7 @@ void makeMove(char board[][SIZE * SIZE], char move[])
         replaceWith = *token;
         replaceAll(board, toReplace, replaceWith);
     }
+        //same as replaceAll
     else if((strcmp(myMove, "change") == 0) && (strlen(move) == CHGLEN))
     {
         token = strtok(NULL, ",");
@@ -773,6 +834,7 @@ void makeMove(char board[][SIZE * SIZE], char move[])
         replaceWith = *token;
         changeChar(board, locationRow, locationCol, replaceWith);
     }
+        //same as replaceAll
     else if((strcmp(myMove, "add") == 0) && (strlen(move) == ADDLEN))
     {
         token = strtok(NULL, ",");
@@ -798,6 +860,7 @@ void makeMove(char board[][SIZE * SIZE], char move[])
         toAdd = *token;
         addChar(board, locationRow, locationCol, toAdd);
     }
+        //same as replaceAll
     else if((strcmp(myMove, "delete") == 0) && (strlen(move) == DLTLEN))
     {
         token = strtok(NULL, ",");
@@ -832,10 +895,12 @@ void makeMove(char board[][SIZE * SIZE], char move[])
 int isSudoku(char board[][SIZE * SIZE])
 {
 
+    //we loop through the board
     for (int i = 0; i < SIZE * SIZE; ++i)
     {
         for (int j = 0; j < SIZE * SIZE; ++j)
         {
+            //if we have something other than spaces or the digits 1-9 we return 1 to indicate it's not a sudoku board
             if((board[ i ][ j ] != ' ') && (((board[ i ][ j ]) < '1') || ((board[ i ][ j ]) > '9')))
             {
                 return 1;
@@ -854,17 +919,22 @@ int isSudoku(char board[][SIZE * SIZE])
 int checkRowGlob(char board[][SIZE * SIZE])
 {
 
+    //the first character, with which we will compare the rest
     char firstChar;
+    //the colums index
     int k = 0;
     for (int i = 0; i < SIZE * SIZE; i++)
     {
+        //we run through the board until we find a char which isn't a space
         do
         {
             firstChar = board[ i ][ k ];
             k++;
         } while (firstChar == ' ');
+        // we compare all the characters to the fisrt char we found
         for (int j = k; j < SIZE * SIZE; j++)
         {
+            // if there is a duplicate we return 1
             if(board[ i ][ j ] == firstChar)
             {
                 return 1;
@@ -882,7 +952,7 @@ int checkRowGlob(char board[][SIZE * SIZE])
 *******************/
 int checkColGlob(char board[][SIZE * SIZE])
 {
-
+    //same as checkRowGlob
     char firstChar;
     int k = 0;
     for (int i = 0; i < SIZE * SIZE; i++)
@@ -913,7 +983,40 @@ void boxify(char board[][SIZE * SIZE])
 {
 
     int k = 0, num = 0;
-    //we break the board into boxes
+    // si - squares rows
+    for (int si = 0; si < SIZE; si++)
+    {
+        // sj - squares columns
+        for (int sj = 0; sj < SIZE; sj++)
+        {
+            // i the board rows
+            for (int i = 0; i < SIZE; i++)
+            {
+                // j the board column
+                for (int j = 0; j < SIZE; j++)
+                {
+                    // we add the numbers from the board to the corresponding square/box in the boxArr array
+                    boxArr[ k ][ num % (SIZE * SIZE) ] = board[ si * SIZE + i ][ sj * SIZE + j ];
+                    num++;
+                }
+            }
+            // we are moving to the next square
+            k++;
+        }
+    }
+}
+
+/*******************
+ * Function Name: squaresToArr
+ *	Input:char box[][SIZE * SIZE] - the array of boxes we will be turning into a board,
+ *	char board[][SIZE * SIZE] the board we will store in
+ *	Output: none
+ *	Function Operation: turns an array of changed boxes back into the board array
+*******************/
+void squaresToArr(char box[][SIZE * SIZE], char board[][SIZE * SIZE])
+{
+// we reverse the actions of boxify
+    int k = 0, num = 0;
     for (int si = 0; si < SIZE; si++)
     {
         for (int sj = 0; sj < SIZE; sj++)
@@ -922,9 +1025,7 @@ void boxify(char board[][SIZE * SIZE])
             {
                 for (int j = 0; j < SIZE; j++)
                 {
-                    //printf("%c", board[si*3+i][sj*3+j]);//TODO DELETE
-
-                    boxArr[ k ][ num % (SIZE * SIZE) ] = board[ si * SIZE + i ][ sj * SIZE + j ];
+                    board[ si * SIZE + i ][ sj * SIZE + j ] = boxArr[ k ][ num % (SIZE * SIZE) ];
                     num++;
                 }
             }
@@ -942,13 +1043,16 @@ void boxify(char board[][SIZE * SIZE])
 int findDups(char boxArr[][SIZE * SIZE])//find if there is more than 1 occurence of char per square
 {
 
+    //indicator for duplicates
     int dups = 0;
+    // we run a loop through the boxes
     for (int k = 0; k < SIZE * SIZE; k++)
     {
         for (int i = 0; i < SIZE * SIZE; i++)
         {
             for (int j = i + 1; j < SIZE * SIZE; j++)
             {
+                //if we found a duplicate which isn't a space we increment the dups
                 if((boxArr[ k ][ i ] == boxArr[ k ][ j ]) && (boxArr[ k ][ i ] != ' '))
                 {
                     dups++;
@@ -956,6 +1060,7 @@ int findDups(char boxArr[][SIZE * SIZE])//find if there is more than 1 occurence
             }
         }
     }
+    // we return the number of duplicates we found
     return dups;
 }
 
@@ -967,7 +1072,7 @@ int findDups(char boxArr[][SIZE * SIZE])//find if there is more than 1 occurence
 *******************/
 int checkSquares(char board[][SIZE * SIZE])
 {
-
+    // we break the board into boxes/squares and store tham in the boxArr array.
     boxify(board);
     return findDups(boxArr);
 }
@@ -983,11 +1088,14 @@ int testBoard(char board[][SIZE * SIZE])
 {
 
     int counter = 0;
+    //we check if the board is sudoku legal - only numbers and spaces
     if(isSudoku(board) == 0)
     {
+        //if any of the tests is positive we add to the counter.
         counter += checkSquares(board);
         counter += checkRowGlob(board);
         counter += checkColGlob(board);
+        //only if the counter is 0 we know that all the tests were passed
         if(counter == 0)
         {
             return 1;
@@ -1008,10 +1116,11 @@ int testBoard(char board[][SIZE * SIZE])
 *******************/
 int checkRowSpaces(char board[][SIZE * SIZE])
 {
-
+    //occurrences of spaces in the board
     int occurrences = 0;
     for (int i = 0; i < SIZE * SIZE; i++)
     {
+        //we set it to zero every row because we want to know if there is more than 1 space every row, not overall
         occurrences = 0;
         for (int j = 0; j < SIZE * SIZE; j++)
         {
@@ -1020,6 +1129,7 @@ int checkRowSpaces(char board[][SIZE * SIZE])
                 occurrences++;
             }
         }
+        //if the current row had more than 1 space we return 0
         if(occurrences > 1)
         {
             return 0;
@@ -1036,7 +1146,7 @@ int checkRowSpaces(char board[][SIZE * SIZE])
 *******************/
 int checkColSpaces(char board[][SIZE * SIZE])
 {
-
+//same as checkRowSpaces
     int occurrences = 0;
     for (int i = 0; i < SIZE * SIZE; i++)
     {
@@ -1062,49 +1172,20 @@ int checkColSpaces(char board[][SIZE * SIZE])
  *	Output:int occurrences   - the number of times the char is in the box
  *	Function Operation: counts the number of occurrences of a char in a square
 *******************/
-int findSign(char toFind, int index)//check the index box to find the space
+int findSign(char toFind, int index)
 {
 
     int occurrences = 0;
     for (int r = 0; r < SIZE * SIZE; r++)
     {
+        //we check the given box
         if(boxArr[ index ][ r ] == toFind)
         {
+            //everytime we find the sign we are looking for we increment
             occurrences++;
         }
     }
     return occurrences;
-}
-
-/*******************
- * Function Name: squaresToArr
- *	Input:char box[][SIZE * SIZE] - the array of boxes we will be turning into a board,
- *	char board[][SIZE * SIZE] the board we will store in
- *	Output: none
- *	Function Operation: turns an array of changed boxes back into the board array
-*******************/
-void squaresToArr(char box[][SIZE * SIZE], char board[][SIZE * SIZE])
-{
-
-    int k = 0, num = 0;
-    //char box[SIZE * SIZE][SIZE * SIZE];//we break the board into boxes
-    for (int si = 0; si < SIZE; si++)
-    {
-        for (int sj = 0; sj < SIZE; sj++)
-        {
-            for (int i = 0; i < SIZE; i++)
-            {
-                for (int j = 0; j < SIZE; j++)
-                {
-                    //printf("%c", board[si*3+i][sj*3+j]);//TODO DELETE
-
-                    board[ si * SIZE + i ][ sj * SIZE + j ] = boxArr[ k ][ num % (SIZE * SIZE) ];
-                    num++;
-                }
-            }
-            k++;
-        }
-    }
 }
 
 /*******************
@@ -1115,24 +1196,30 @@ void squaresToArr(char box[][SIZE * SIZE], char board[][SIZE * SIZE])
 *******************/
 void completeBoard(char board[][SIZE * SIZE])
 {
-    //int a=findSign(board,' ',1);
+    //if all the test were passed we may continue
     if((testBoard(board) == 1) && (checkRowSpaces(board) == 1) && (checkColSpaces(board) == 1))
     {
-        for (int i = 0; i < SIZE * SIZE; i++)//check each box for empty spaces i=box index
+        //check each box for empty spaces i=box index
+        for (int i = 0; i < SIZE * SIZE; i++)
         {
-            for (int j = 0; j < SIZE * SIZE; j++)//j= chars in box
+            //j= chars in box
+            for (int j = 0; j < SIZE * SIZE; j++)
+                //we are looing for the space in the square
                 if(boxArr[ i ][ j ] == ' ')
                 {
+                    //we try to insert every number until it fits the rules of sudoku
                     for (int k = 1; k <= SIZE * SIZE; k++)
                     {
                         boxArr[ i ][ j ] = k + '0';
                         if(findSign(boxArr[ i ][ j ], i) == 1)
-                        {//if the number doesn't break the box rules
+                        {
+                            //if the number doesn't break the box rules
                             break;
                         }
                     }
                 }
         }
+        //we turn the boxes back into a board
         squaresToArr(boxArr, board);
     }
     else
@@ -1151,6 +1238,7 @@ void completeBoard(char board[][SIZE * SIZE])
 int isSameBoard(char board[][SIZE * SIZE], char board1[][SIZE * SIZE])//TODO
 {
 
+    // we compare the board to see if they are the same
     if((strcmp(*board, *board1)) == 0)
     {
         return 1;
@@ -1161,9 +1249,9 @@ int isSameBoard(char board[][SIZE * SIZE], char board1[][SIZE * SIZE])//TODO
         {
             for (int j = 0; j < (SIZE * SIZE); j++)
             {
+                // we are looking for the difference between the boards
                 if(board[ i ][ j ] != board1[ i ][ j ])
                 {
-                    //printf("board1:%c board2:%c\n", board[ i ][ j ], board1[ i ][ j ]);//
                     printf("Found inequality on row %d col %d.\n", (i), (j));
                     return 0;
                 }
